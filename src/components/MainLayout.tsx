@@ -7,8 +7,8 @@ import { colors } from '../styles/commonStyles';
 // Layout principal con sidebar, header y contenido
 interface MainLayoutProps {
   children: React.ReactNode;
-  currentSection: 'empresas' | 'usuarios' | 'productos';
-  onSectionChange: (section: 'empresas' | 'usuarios' | 'productos') => void;
+  currentSection: 'empresas' | 'usuarios' | 'productos' | 'movimientos';
+  onSectionChange: (section: 'empresas' | 'usuarios' | 'productos' | 'movimientos') => void;
 }
 
 export function MainLayout({ children, currentSection, onSectionChange }: MainLayoutProps) {
@@ -25,6 +25,7 @@ export function MainLayout({ children, currentSection, onSectionChange }: MainLa
     { id: 'empresas', label: 'Empresas', icon: 'business' },
     { id: 'usuarios', label: 'Usuarios', icon: 'people' },
     { id: 'productos', label: 'Productos', icon: 'cube' },
+    { id: 'movimientos', label: 'Movimientos', icon: 'swap-vertical' },
   ];
 
   return (
@@ -32,7 +33,7 @@ export function MainLayout({ children, currentSection, onSectionChange }: MainLa
       {/* Header Superior */}
       <View style={styles.header}>
         <View style={styles.logoContainer}>
-          <MaterialCommunityIcons name="silverware-fork-knife" size={28} color={colors.white} />
+          <MaterialCommunityIcons name="silverware-fork-knife" size={48} color={colors.white} />
           <Text style={styles.logo}>POS Restaurant</Text>
         </View>
         
@@ -150,9 +151,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    paddingTop: 50,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    paddingTop: 40,
     backgroundColor: colors.primary,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -164,10 +165,10 @@ const styles = StyleSheet.create({
   logoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 10,
   },
   logo: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     color: colors.white,
   },
