@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
-import { Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useStore } from '../../context/StoreContext';
 import { colors, commonStyles } from '../../styles/commonStyles';
 import EmpresaContainer from './EmpresaContainer';
 import { EmpresaList } from './components/EmpresaList';
@@ -12,8 +13,12 @@ import { useEmpresa } from './hooks/useEmpresa';
  */
 export default function EmpresaPage() {
     const { empresas } = useEmpresa();
+    const { state } = useStore();
     const [modalVisible, setModalVisible] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+
+    // Solo el Admin del Sistema (empresaId: '1' y rolId: '1') puede crear empresas
+    const canCreateEmpresa = state.usuarioLogueado?.rolId === '1' && state.usuarioLogueado?.empresaId === '1';
 
     // Filtrado en tiempo real por nombre, RUC o dirección
     const empresasFiltradas = empresas.filter((empresa) =>
@@ -23,7 +28,7 @@ export default function EmpresaPage() {
     );
 
     return (
-        <View style={styles.container}>
+        <View style={commonStyles.pageContainer}>
         {/* Contenedor con ancho máximo para pantallas grandes */}
         <View style={commonStyles.contentWrapper}>
             {/* Barra de búsqueda y botón */}
@@ -43,13 +48,15 @@ export default function EmpresaPage() {
                     </TouchableOpacity>
                     )}
                 </View>
-                <TouchableOpacity
-                    style={styles.addButton}
-                    onPress={() => setModalVisible(true)}
-                >
-                    <Ionicons name="add-circle" size={20} color={colors.white} style={{ marginRight: 6 }} />
-                    <Text style={styles.addButtonText}>Nueva</Text>
-                </TouchableOpacity>
+                {canCreateEmpresa && (
+                    <TouchableOpacity
+                        style={commonStyles.actionButton}
+                        onPress={() => setModalVisible(true)}
+                    >
+                        <Ionicons name="add-circle" size={20} color={colors.white} style={{ marginRight: 6 }} />
+                        <Text style={commonStyles.actionButtonText}>Nueva</Text>
+                    </TouchableOpacity>
+                )}
             </View>
 
             {/* Lista de empresas */}
@@ -74,7 +81,7 @@ export default function EmpresaPage() {
                         <Text style={commonStyles.modalTitle}>Nueva Empresa</Text>
                         <TouchableOpacity 
                             onPress={() => setModalVisible(false)}
-                            style={styles.closeButtonContainer}
+                            style={commonStyles.closeButtonContainer}
                         >
                             <Ionicons name="close" size={24} color={colors.textLight} />
                         </TouchableOpacity>
@@ -89,42 +96,4 @@ export default function EmpresaPage() {
     );
     }
 
-// Estilos locales (solo los específicos de esta página)
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: colors.background,
-    },
-    addButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: colors.primary,
-        paddingHorizontal: 20,
-        paddingVertical: 14,
-        borderRadius: 10,
-        shadowColor: colors.primary,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 4,
-    },
-    addButtonText: {
-        color: colors.white,
-        fontSize: 16,
-        fontWeight: '600',
-    },
-    closeButtonContainer: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        backgroundColor: colors.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
-    },
-
-});
+// Ya no necesitamos estilos locales, todos están en commonStyles

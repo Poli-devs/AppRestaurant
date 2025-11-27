@@ -10,7 +10,7 @@ interface InputProps extends TextInputProps {
 export function Input({ label, error, style, ...props }: InputProps) {
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>{label}</Text>
+      {label ? <Text style={styles.label}>{label}</Text> : null}
       <TextInput
         style={[styles.input, error ? styles.inputError : null, style]}
         placeholderTextColor="#999"

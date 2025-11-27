@@ -1,12 +1,10 @@
-import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { EmptyState } from '../../../components/EmptyState';
+import { SortableTableHeader } from '../../../components/SortableTableHeader';
 import { Empresa } from '../../../context/StoreContext';
-import { colors, commonStyles } from '../../../styles/commonStyles';
-
-// Tabla con ordenamiento clickeable por columnas
-type SortField = 'nombre' | 'ruc' | 'direccion';
-type SortOrder = 'asc' | 'desc';
+import { useTableSort } from '../../../hooks/useTableSort';
+import { commonStyles } from '../../../styles/commonStyles';
 
 interface EmpresaListProps {
   empresas: Empresa[];
@@ -14,64 +12,26 @@ interface EmpresaListProps {
 }
 
 export function EmpresaList({ empresas, searchQuery = '' }: EmpresaListProps) {
-  const [sortField, setSortField] = useState<SortField>('nombre');
-  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  const { sortedData, sortOrder, handleSort, isSorting } = useTableSort(empresas, 'nombre');
 
-  // Ordena empresas según campo y dirección seleccionados
-  const sortEmpresas = (empresas: Empresa[]): Empresa[] => {
-    return [...empresas].sort((a, b) => {
-      let comparison = 0;
-      
-      if (sortField === 'nombre') {
-        comparison = a.nombre.localeCompare(b.nombre);
-      } else if (sortField === 'ruc') {
-        comparison = a.ruc.localeCompare(b.ruc);
-      } else if (sortField === 'direccion') {
-        comparison = a.direccion.localeCompare(b.direccion);
-      }
-      
-      return sortOrder === 'asc' ? comparison : -comparison;
-    });
-  };
-
-  // Manejar click en encabezado
-  const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      // Si ya está ordenado por este campo, cambiar dirección
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      // Si es un campo nuevo, ordenar ascendente
-      setSortField(field);
-      setSortOrder('asc');
-    }
-  };
-
-  // Renderizar icono de ordenamiento
-  const renderSortIcon = (field: SortField) => {
-    if (sortField !== field) {
-      return <Text style={styles.sortIcon}>⇅</Text>;
-    }
-    return <Text style={styles.sortIconActive}>{sortOrder === 'asc' ? '↑' : '↓'}</Text>;
-  };
-
-  const empresasOrdenadas = sortEmpresas(empresas);
+  // Estados vacíos
   if (empresas.length === 0 && searchQuery.length === 0) {
     return (
-      <View style={commonStyles.emptyContainer}>
-        <Ionicons name="briefcase-outline" size={64} color={colors.textMuted} style={{ marginBottom: 16 }} />
-        <Text style={commonStyles.emptyText}>No hay empresas registradas</Text>
-        <Text style={commonStyles.emptySubtext}>Presiona "Nueva" para crear tu primera empresa</Text>
-      </View>
+      <EmptyState
+        icon="briefcase-outline"
+        title="No hay empresas registradas"
+        subtitle='Presiona "Nueva" para crear tu primera empresa'
+      />
     );
   }
 
   if (empresas.length === 0 && searchQuery.length > 0) {
     return (
-      <View style={commonStyles.emptyContainer}>
-        <Ionicons name="search-outline" size={64} color={colors.textMuted} style={{ marginBottom: 16 }} />
-        <Text style={commonStyles.emptyText}>No se encontraron resultados</Text>
-        <Text style={commonStyles.emptySubtext}>Intenta con otro término de búsqueda</Text>
-      </View>
+      <EmptyState
+        icon="search-outline"
+        title="No se encontraron resultados"
+        subtitle="Intenta con otro término de búsqueda"
+      />
     );
   }
 
@@ -82,34 +42,40 @@ export function EmpresaList({ empresas, searchQuery = '' }: EmpresaListProps) {
         <View style={[styles.headerCell, styles.numberColumn]}>
           <Text style={styles.headerText}>#</Text>
         </View>
-        
-        <TouchableOpacity 
-          style={[styles.headerCell, styles.nameColumn, styles.sortableHeader]}
-          onPress={() => handleSort('nombre')}
-        >
-          <Text style={styles.headerText}>Nombre</Text>
-          {renderSortIcon('nombre')}
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={[styles.headerCell, styles.rucColumn, styles.sortableHeader]}
-          onPress={() => handleSort('ruc')}
-        >
-          <Text style={styles.headerText}>RUC</Text>
-          {renderSortIcon('ruc')}
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={[styles.headerCell, styles.addressColumn, styles.sortableHeader]}
-          onPress={() => handleSort('direccion')}
-        >
-          <Text style={styles.headerText}>Dirección</Text>
-          {renderSortIcon('direccion')}
-        </TouchableOpacity>
+
+        <View style={[styles.headerCell, styles.nameColumn]}>
+          <SortableTableHeader
+            field="nombre"
+            label="Nombre"
+            onSort={handleSort}
+            isSorting={isSorting('nombre')}
+            sortOrder={sortOrder}
+          />
+        </View>
+
+        <View style={[styles.headerCell, styles.rucColumn]}>
+          <SortableTableHeader
+            field="ruc"
+            label="RUC"
+            onSort={handleSort}
+            isSorting={isSorting('ruc')}
+            sortOrder={sortOrder}
+          />
+        </View>
+
+        <View style={[styles.headerCell, styles.addressColumn]}>
+          <SortableTableHeader
+            field="direccion"
+            label="Dirección"
+            onSort={handleSort}
+            isSorting={isSorting('direccion')}
+            sortOrder={sortOrder}
+          />
+        </View>
       </View>
 
       {/* Filas de la tabla */}
-      {empresasOrdenadas.map((item, index) => (
+      {sortedData.map((item, index) => (
         <View key={item.id} style={commonStyles.tableRow}>
           <View style={[styles.cell, styles.numberColumn]}>
             <View style={styles.numberBadge}>
@@ -137,26 +103,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  sortableHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-  },
   headerText: {
     fontSize: 13,
     fontWeight: '700',
     color: '#666',
     textTransform: 'uppercase',
-  },
-  sortIcon: {
-    fontSize: 14,
-    color: colors.textMuted,
-  },
-  sortIconActive: {
-    fontSize: 14,
-    color: colors.primary,
-    fontWeight: 'bold',
   },
   cell: {
     justifyContent: 'center',

@@ -9,6 +9,16 @@ import { validarLongitudMinima, validarNoVacio, validarRUC } from '../../../util
 export function useEmpresa() {
   const { state, dispatch } = useStore();
 
+  // Verificar si es el Admin del sistema (empresaId: '1' y rolId: '1')
+  const isSystemAdmin = state.usuarioLogueado?.rolId === '1' && state.usuarioLogueado?.empresaId === '1';
+
+  // Filtrar empresas según el tipo de usuario
+  // Solo el Admin del sistema (empresaId: '1') ve todas las empresas
+  // Todos los demás (incluyendo admins de otras empresas) solo ven su empresa
+  const empresasFiltradas = isSystemAdmin
+    ? state.empresas
+    : state.empresas.filter(e => e.id === state.usuarioLogueado?.empresaId);
+
   // Crea una nueva empresa con validaciones completas
   const crearEmpresa = (nombre: string, ruc: string, direccion: string): { success: boolean; error?: string } => {
     // Validaciones de campos requeridos y formatos
@@ -51,12 +61,12 @@ export function useEmpresa() {
   };
 
   const obtenerEmpresas = () => {
-    return state.empresas;
+    return empresasFiltradas;
   };
 
   return {
     crearEmpresa,
     obtenerEmpresas,
-    empresas: state.empresas,
+    empresas: empresasFiltradas,
   };
 }

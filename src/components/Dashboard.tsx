@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
 import { LoginPage } from '../features/auth/LoginPage';
 import EmpresaPage from '../features/empresas/EmpresaPage';
+import MovimientoPage from '../features/movimientos/MovimientoPage';
+import ProductoPage from '../features/productos/ProductoPage';
+import UsuarioPage from '../features/usuarios/UsuarioPage';
 import { MainLayout } from './MainLayout';
 
 // Dashboard principal que maneja la navegación entre secciones y autenticación
 export function Dashboard() {
   const { state } = useStore();
-  const [currentSection, setCurrentSection] = useState<'empresas' | 'usuarios' | 'productos'>('empresas');
+  const [currentSection, setCurrentSection] = useState<'empresas' | 'usuarios' | 'productos' | 'movimientos'>('empresas');
 
   // Si no hay usuario logueado, mostrar pantalla de login
   if (!state.usuarioLogueado) {
@@ -19,9 +22,11 @@ export function Dashboard() {
       case 'empresas':
         return <EmpresaPage />;
       case 'usuarios':
-        return <EmpresaPage />; // Temporal, luego será UsuarioPage
+        return <UsuarioPage />;
       case 'productos':
-        return <EmpresaPage />; // Temporal, luego será ProductoPage
+        return <ProductoPage />;
+      case 'movimientos':
+        return <MovimientoPage />;
       default:
         return <EmpresaPage />;
     }

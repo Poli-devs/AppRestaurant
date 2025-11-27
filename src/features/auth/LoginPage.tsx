@@ -1,6 +1,6 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { useState } from 'react';
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useStore } from '../../context/StoreContext';
 import { colors } from '../../styles/commonStyles';
 
@@ -13,7 +13,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState({ email: '', password: '' });
+  const [errors, setErrors] = useState({ email: '', password: '', general: '' });
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -22,11 +22,11 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
   const handleLogin = () => {
     // Resetear errores
-    setErrors({ email: '', password: '' });
+    setErrors({ email: '', password: '', general: '' });
 
     // Validaciones
     let hasErrors = false;
-    const newErrors = { email: '', password: '' };
+    const newErrors = { email: '', password: '', general: '' };
 
     if (!email.trim()) {
       newErrors.email = 'El email es requerido';
@@ -46,17 +46,35 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
       return;
     }
 
-    // Buscar usuario en el estado
-    const usuario = state.usuarios.find(
-      (u) => u.email === email && u.password === password
+    // Buscar usuario por email
+    const usuarioExiste = state.usuarios.find(
+      (u) => u.email.toLowerCase() === email.toLowerCase()
     );
 
-    if (usuario) {
-      dispatch({ type: 'LOGIN', payload: usuario });
-      onLoginSuccess();
-    } else {
-      Alert.alert('Error', 'Credenciales incorrectas');
+    if (!usuarioExiste) {
+      // El email no está registrado
+      setErrors({ 
+        email: 'Este email no está registrado en el sistema', 
+        password: '', 
+        general: '' 
+      });
+      return;
     }
+
+    // Verificar contraseña
+    if (usuarioExiste.password !== password) {
+      // La contraseña es incorrecta
+      setErrors({ 
+        email: '', 
+        password: 'La contraseña es incorrecta', 
+        general: '' 
+      });
+      return;
+    }
+
+    // Login exitoso
+    dispatch({ type: 'LOGIN', payload: usuarioExiste });
+    onLoginSuccess();
   };
 
   return (
@@ -80,7 +98,12 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                 style={styles.input}
                 placeholder="correo@ejemplo.com"
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(text) => {
+                  setEmail(text);
+                  if (errors.email || errors.general) {
+                    setErrors({ ...errors, email: '', general: '' });
+                  }
+                }}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 placeholderTextColor="#999"
@@ -98,7 +121,12 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                 style={styles.input}
                 placeholder="••••••••"
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={(text) => {
+                  setPassword(text);
+                  if (errors.password || errors.general) {
+                    setErrors({ ...errors, password: '', general: '' });
+                  }
+                }}
                 secureTextEntry={!showPassword}
                 placeholderTextColor="#999"
               />
@@ -112,6 +140,14 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
             </View>
             {errors.password ? <Text style={styles.errorText}>{errors.password}</Text> : null}
           </View>
+
+          {/* Error general */}
+          {errors.general ? (
+            <View style={styles.generalErrorContainer}>
+              <Ionicons name="alert-circle" size={20} color={colors.danger} />
+              <Text style={styles.generalErrorText}>{errors.general}</Text>
+            </View>
+          ) : null}
 
           {/* Botón de login */}
           <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
@@ -209,6 +245,22 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.danger,
     marginTop: 4,
+  },
+  generalErrorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#fff5f5',
+    borderWidth: 1,
+    borderColor: colors.danger,
+    borderRadius: 8,
+    padding: 12,
+  },
+  generalErrorText: {
+    flex: 1,
+    fontSize: 13,
+    color: colors.danger,
+    fontWeight: '500',
   },
   loginButton: {
     flexDirection: 'row',

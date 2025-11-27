@@ -1,5 +1,5 @@
 import React, { createContext, ReactNode, useContext, useReducer } from 'react';
-import { empresasSeed, usuariosSeed } from '../utils/seedData';
+import { empresasSeed, productosSeed, usuariosSeed } from '../utils/seedData';
 
 /**
  * StoreContext - Manejo de estado global con Context API + useReducer
@@ -28,6 +28,7 @@ export interface Usuario {
   password: string;
   empresaId: string;
   rolId: string;
+  direccion: string;
 }
 
 export interface Producto {
@@ -35,6 +36,7 @@ export interface Producto {
   nombre: string;
   empresaId: string;
   costoBase: number;
+  precioVenta: number;
   inventario: number;
 }
 
@@ -89,7 +91,7 @@ const initialState: StoreState = {
   empresas: empresasSeed,
   usuarios: usuariosSeed,
   roles: rolesIniciales,
-  productos: [],
+  productos: productosSeed,
   movimientos: [],
   precios: [],
   usuarioLogueado: null,

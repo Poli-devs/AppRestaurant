@@ -179,6 +179,48 @@ export const commonStyles = StyleSheet.create({
     padding: 24,
   },
 
+  // Botones de acción (agregar, crear, etc.)
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primary,
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderRadius: 10,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+
+  actionButtonText: {
+    color: colors.white,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+
+  // Botón de cerrar modal
+  closeButtonContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+
+  // Container de página
+  pageContainer: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+
   // Estados vacíos
   emptyContainer: {
     padding: 60,
